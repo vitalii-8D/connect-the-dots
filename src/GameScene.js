@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 
 import Dot from "./Dot";
 import Dots from "./Dots";
+import CustomGraphics from "./Graphics";
 
 import {CELL_SIZE, COL_NUM, COLOR_SET, DOT_SIZE, ROW_NUM} from './constants'
 
@@ -16,7 +17,6 @@ export default class GameScene extends Phaser.Scene {
    painter;
    /** @type {Phaser.GameObjects.Line} */
    mouseLine;
-   linesArr = []
 
    constructor() {
       super('game');
@@ -25,9 +25,10 @@ export default class GameScene extends Phaser.Scene {
    create() {
       this.dotsGroup = new Dots(this)
 
-      this.painter = this.add.graphics();
-      this.mouseLine = this.add.line().setOrigin(0, 0)
-      this.mouseLine.setLineWidth(5, 5)
+      // this.painter = this.add.graphics();
+      // this.mouseLine = this.add.line().setOrigin(0, 0)
+      // this.mouseLine.setLineWidth(5, 5)
+      this.graphics = new CustomGraphics(this)
 
       this.input.on('pointerdown', this.startDrag, this)
    }
@@ -43,16 +44,18 @@ export default class GameScene extends Phaser.Scene {
       // Creating object for further dots moving
       this.updateMoveObj(dot.col, dot.row)
 
-      // Graphics
-      this.painter.lineStyle(10, dot.color)
-      this.painter.fillStyle(10, dot.color)
-      this.painter.beginPath();
-      this.painter.moveTo(dot.x, dot.y);
+      this.graphics.startLineFrom(dot)
 
-      // Mouse Line
-      this.mouseLine.setTo(dot.x, dot.y, dot.x, dot.y)
-      this.mouseLine.setAlpha(1)
-      this.mouseLine.setStrokeStyle(5, this.chosenColor, 1)
+      // // Graphics
+      // this.painter.lineStyle(10, dot.color)
+      // this.painter.fillStyle(10, dot.color)
+      // this.painter.beginPath();
+      // this.painter.moveTo(dot.x, dot.y);
+      //
+      // // Mouse Line
+      // this.mouseLine.setTo(dot.x, dot.y, dot.x, dot.y)
+      // this.mouseLine.setAlpha(1)
+      // this.mouseLine.setStrokeStyle(5, this.chosenColor, 1)
 
       this.input.off('pointerdown', this.startDrag, this)
       this.input.on('pointermove', this.drawMouseLine, this)
@@ -75,9 +78,10 @@ export default class GameScene extends Phaser.Scene {
          // Creating object for further dots moving
          this.updateMoveObj(dot.col, dot.row)
 
+         this.graphics.connectLineTo(dot)
          // Graphics
-         this.painter.lineTo(dot.x, dot.y);
-         this.painter.strokePath();
+         // this.painter.lineTo(dot.x, dot.y);
+         // this.painter.strokePath();
       }
    }
 
@@ -95,13 +99,14 @@ export default class GameScene extends Phaser.Scene {
       this.moveObj = {}
       this.chosenColor = null
 
+      this.graphics.clearDrawings()
       // Graphics
-      this.mouseLine.setAlpha(0)
+      // this.mouseLine.setAlpha(0)
       // this.mouseLine.setStrokeStyle()
       // this.painter.closePath();
       // this.painter.strokePath();
 
-      this.painter.clear();
+      // this.painter.clear();
 
       this.input.on('pointerdown', this.startDrag, this)
       this.input.off('pointermove', this.drawMouseLine, this)
@@ -112,7 +117,8 @@ export default class GameScene extends Phaser.Scene {
    drawMouseLine(pointer) {
       const lastDot = this.chosenDots[this.chosenDots.length - 1]
 
-      this.mouseLine.setTo(lastDot.x, lastDot.y, pointer.x, pointer.y)
+      this.graphics.updateMouseLine(lastDot, pointer)
+      // this.mouseLine.setTo(lastDot.x, lastDot.y, pointer.x, pointer.y)
    }
 
    updateMoveObj(col, row) {
