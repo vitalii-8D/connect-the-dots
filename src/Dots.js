@@ -50,7 +50,4 @@ export default class Dots extends Phaser.GameObjects.Group {
       }
    }
 
-   // getNewDots(moveObj) {
-   //
-   // }
 }
