@@ -9,14 +9,6 @@ import {CELL_SIZE, COL_NUM, COLOR_SET, DOT_SIZE, ROW_NUM} from './constants'
 export default class GameScene extends Phaser.Scene {
    /** @type {Dots} */
    dotsGroup;
-   chosenColor;
-   chosenDots = [];
-   moveObj = {}
-
-   /** @type {Phaser.GameObjects.Graphics} */
-   painter;
-   /** @type {Phaser.GameObjects.Line} */
-   mouseLine;
 
    constructor() {
       super('game');
@@ -34,12 +26,7 @@ export default class GameScene extends Phaser.Scene {
       const dot = targets[0]
       if (!dot) return;
 
-      this.chosenColor = dot.color;
-      this.chosenDots.push(dot)
-
-      // Creating object for further dots moving
-      this.updateMoveObj(dot.col, dot.row)
-
+      this.dotsGroup.onDotClick(dot)
       this.graphics.startLineFrom(dot)
 
       this.input.off('pointerdown', this.startDrag, this)
@@ -53,34 +40,19 @@ export default class GameScene extends Phaser.Scene {
       const dot = targets[0]
       if (!dot) return;
 
-      const lastChosenDot = this.chosenDots[this.chosenDots.length - 1];
-      if (dot.color === this.chosenColor
-         && Phaser.Math.Distance.Between(dot.x, dot.y, lastChosenDot.x, lastChosenDot.y) < CELL_SIZE + 5
-         && !this.chosenDots.some(d => d === dot)
-      ) {
-         this.chosenDots.push(dot)
-
-         // Creating object for further dots moving
-         this.updateMoveObj(dot.col, dot.row)
-
-         this.graphics.connectLineTo(dot)
-      }
+      this.dotsGroup.onDotOverlap(dot, (action) => {
+         if (action === 'connect') {
+            this.graphics.connectLineTo(dot)
+         }
+         if (action === 'undo') {
+            this.graphics.redrawLines(this.dotsGroup.chosenDots)
+         }
+      })
    }
 
    stopDrag(pointer, targets) {
-      if (this.chosenDots.length > 1) {
-
-         this.chosenDots.forEach(dot => {
-            this.dotsGroup.killAndHide(dot)
-         })
-
-         this.dotsGroup.handleChosenDots(this.moveObj)
-      }
-
-      this.chosenDots = []
-      this.moveObj = {}
-      this.chosenColor = null
-
+      this.dotsGroup.onMouseUp()
+      this.dotsGroup.resetHelpers()
       this.graphics.clearDrawings()
 
       this.input.on('pointerdown', this.startDrag, this)
@@ -90,17 +62,9 @@ export default class GameScene extends Phaser.Scene {
    }
 
    drawMouseLine(pointer) {
-      const lastDot = this.chosenDots[this.chosenDots.length - 1]
+      const lastDot = this.dotsGroup.chosenDots[this.dotsGroup.chosenDots.length - 1]
 
       this.graphics.updateMouseLine(lastDot, pointer)
-   }
-
-   updateMoveObj(col, row) {
-      // Creating object for further dots moving
-      if (!this.moveObj[col]) {
-         this.moveObj[col] = []
-      }
-      this.moveObj[col].push(row)
    }
 
 }

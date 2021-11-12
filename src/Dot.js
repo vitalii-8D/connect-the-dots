@@ -36,7 +36,7 @@ export default class Dot extends Phaser.GameObjects.Arc {
       scene.tweens.add({
          targets: this,
          y: y,
-         delay: col * 100 * COL_NUM + (ROW_NUM - 1 - row) * 100 + 500,
+         delay: col * 30 * COL_NUM + (ROW_NUM - 1 - row) * 30 + 500,
          duration: 100,
          ease: 'Linear'
       })
@@ -65,8 +65,8 @@ export default class Dot extends Phaser.GameObjects.Arc {
       this.setFillStyle(data.color)
       this.row = row
       this.y = -CELL_SIZE
-      this.setActive(true)
-      this.setVisible(true)
+
+      this.enableDot()
 
       this.scene.tweens.add({
          targets: this,
@@ -74,6 +74,11 @@ export default class Dot extends Phaser.GameObjects.Arc {
          duration: 100,
          ease: 'Linear'
       })
+   }
+
+   enableDot() {
+      this.setActive(true)
+      this.setVisible(true)
    }
 
 }
