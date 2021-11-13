@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import Dot from "./Dot";
 
-import {CELL_SIZE,COL_NUM,COLOR_SET,DOT_SIZE, ROW_NUM} from './constants'
+import {CELL_SIZE, COL_NUM, COLOR_SET, DOT_SIZE, ROW_NUM} from './constants'
 
 export default class Dots extends Phaser.GameObjects.Group {
    /** @type {Phaser.Scene} */
@@ -87,19 +87,34 @@ export default class Dots extends Phaser.GameObjects.Group {
          const shift = moveObj[col].length
          const startRowIndex = Math.min(...moveObj[col]) - 1
 
+         const maxRowIndex = Math.max(...moveObj[col])
+
          const dotsCol = this.getMatching('col', +col);
+         const dotsToMove = dotsCol.filter(dot => dot.row < maxRowIndex && dot.active)
 
-         if (startRowIndex >= 0) {
-            dotsCol.forEach(dot => {
-               if (dot.row <= startRowIndex) {
-                  dot.goDownPer(shift)
-               }
-            })
-         } else {
-            for (let i = 0; i < shift; i++) {
+         // **********************
+         let s = 1;
+         let cell = maxRowIndex
 
+         for (let i = maxRowIndex - 1; i >= 0; i--) {
+            const dot = dotsCol.find(d => d.row === i)
+            console.log(dot);
+            if (dot.active) {
+               dot.goDownPer(s)
+               cell--;
+            } else {
+               s++;
             }
          }
+         // ************************************
+
+         // if (startRowIndex >= 0) {
+         //    dotsCol.forEach(dot => {
+         //       if (dot.row <= startRowIndex) {
+         //          dot.goDownPer(shift)
+         //       }
+         //    })
+         // }
 
          const inactiveDots = dotsCol.filter(dot => !dot.active)
 
