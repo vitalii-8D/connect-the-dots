@@ -5,6 +5,9 @@ import {CELL_SIZE, COL_NUM, COLOR_SET, DOT_SIZE, ROW_NUM, X_MARGIN, Y_MARGIN} fr
 
 // Our Dot`s class
 export default class Dot extends Phaser.GameObjects.Arc {
+   /** @type {Phaser.GameObjects.Particles.ParticleEmitter} */
+   emitter;  // Particles emitter
+
    static generateAttributes(colNum, rowNum) {  // Generating Dot`s attributes
       const color = Phaser.Utils.Array.GetRandom(COLOR_SET)  // Get random color from the set
 
@@ -23,7 +26,7 @@ export default class Dot extends Phaser.GameObjects.Arc {
    }
 
    init(data) {
-      const {scene, y, color, col, row} = data;
+      const {scene, x, y, color, col, row} = data;
 
       this.scene = scene
       this.col = col
@@ -33,9 +36,29 @@ export default class Dot extends Phaser.GameObjects.Arc {
       this.setInteractive()  // Making Dot visible for Pointer events
       this.scene.add.existing(this)  // Adding Dot to the scene
 
+      this.emitter = scene.particles.generateEmitter({x, y, color})
+      console.log(this.emitter);
+
       this.createTween({
          y,
          delay: col * 30 * COL_NUM + (ROW_NUM - 1 - row) * 30 + 500
+      }).play()
+
+      this.onSelectTween = this.createTween({
+         // ease: 'Cubic',
+         yoyo: true,
+         repeat: -1,
+         delay: 30,
+         duration: 300,
+         scale: 1.15,
+         alpha: 1,
+         onLoop: () => {
+            this.setScale(Math.cos(this.scene.time.now) * 0.3+0.85, Math.sin(this.scene.time.now) * 0.3+0.85)
+         },
+         onStop: () => {
+            this.setScale(1)
+         },
+         callbackScope: this
       })
    }
 
@@ -53,10 +76,10 @@ export default class Dot extends Phaser.GameObjects.Arc {
 
    goDownPer(cellsNum) {  // Move Dot down to empty place per given cell number
       this.row += cellsNum
-      // this.y += cellsNum * CELL_SIZE;
+
       this.createTween({
          y: `+=${cellsNum * CELL_SIZE}`
-      })
+      }).play()
    }
 
    setNewColorAndPosition(row, col = this.col) {  // Resetting destroyed Dot
@@ -73,7 +96,7 @@ export default class Dot extends Phaser.GameObjects.Arc {
       this.createTween({
          y: data.y,
          delay: (ROW_NUM - row) * 20
-      })
+      }).play()
    }
 
    makeActive() {  // Set the Dot to the active state
@@ -81,6 +104,29 @@ export default class Dot extends Phaser.GameObjects.Arc {
       this.setVisible(true)
    }
 
+   playOnSelectTween() {
+      this.onSelectTween.play()
+   }
+   stopOnSelectTween() {
+      this.onSelectTween.stop()
+   }
+   emitParticles(moveDots) {
+      this.scene.particles.changeConfig(this)
+      this.emitter.start()
+
+      this.createTween({
+         scale: 0.2,
+         duration: 500,
+         onComplete: () => {
+            this.emitter.stop()
+            console.log('complete');
+            moveDots()
+         },
+         callbackScope: this
+      }).play()
+   }
+
+   /** @param {Phaser.Types.Tweens.TweenBuilderConfig} extra */
    createTween(extra = {}) { // Create animation of falling Dot
 
       /** @type {Phaser.Types.Tweens.TweenBuilderConfig} */
@@ -91,7 +137,7 @@ export default class Dot extends Phaser.GameObjects.Arc {
          ...extra
       }
 
-      this.scene.tweens.add(tweenConfig)  // adding tween to the scene
+      return this.scene.tweens.create(tweenConfig)  // adding tween to the scene
    }
 
 }

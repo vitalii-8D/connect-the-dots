@@ -31,7 +31,7 @@ export default class DotsField extends Phaser.GameObjects.Group {
    selectFirst(dot) {
       // Selecting the Dot when clicking the first time
       this.selectedColor = dot.color;
-      this.selectedDots.push(dot)
+      this.selectDot(dot)
    }
 
    connectNext(dot, connectLine, undoConnecting) {
@@ -42,7 +42,7 @@ export default class DotsField extends Phaser.GameObjects.Group {
          && Phaser.Math.Distance.Between(dot.x, dot.y, lastSelectedDot.x, lastSelectedDot.y) < CELL_SIZE + 5
          && !this.selectedDots.some(d => d === dot)
       ) {
-         this.selectedDots.push(dot)
+         this.selectDot(dot)
 
          connectLine(dot)  // Connect Dot with the previously selected one.  Method from CustomGraphics
       }
@@ -50,6 +50,7 @@ export default class DotsField extends Phaser.GameObjects.Group {
       // Checking if hovered Dot intended should be unmarked
       if (dot === this.getSelectedDotAtPosition(-2)) {
          const releasedDot = this.selectedDots.pop()
+         this.unselectDot(releasedDot)
 
          undoConnecting(this.selectedDots) // Redrawing all lines after undoing last selecting.  Method from CustomGraphics
       }
@@ -60,22 +61,31 @@ export default class DotsField extends Phaser.GameObjects.Group {
       if (this.selectedDots.length > 1) {
          this.destroyDots(this.selectedDots)  // Kill and Hide the the given Dots
 
-         this.moveDownDots(this.selectedDots)  // Move Dots down to free space
+         this.emitParticles(this.selectedDots, () => {
+            this.moveDownDots(this.selectedDots)  // Move Dots down to free space
 
-         const earnedPoints = this.selectedDots.length * POINTS_PER_DOT  //
-         sceneEvents.emit('points-earned', earnedPoints)  // Emitting event for Points increasing in GameScene
+            const earnedPoints = this.selectedDots.length * POINTS_PER_DOT  //
+            sceneEvents.emit('points-earned', earnedPoints)  // Emitting event for Points increasing in GameScene
+         })
       }
 
       this.resetHelpers()
    }
 
    resetHelpers() {  // Resetting helpers after pointer is UP
+      this.selectedDots.forEach(dot => this.unselectDot(dot))
       this.selectedDots = []
       this.selectedColor = null
    }
 
+   emitParticles(dotsArr, cb) {
+      dotsArr.forEach(dot => {
+         dot.emitParticles(cb)
+      })
+   }
+
    destroyDots(dotsArr) {   // Kill and Hide the the given Dots
-      return dotsArr.forEach(dot => {
+      dotsArr.forEach(dot => {
          this.killAndHide(dot)
       })
    }
@@ -128,6 +138,14 @@ export default class DotsField extends Phaser.GameObjects.Group {
    // Get selected dot at special position
    getSelectedDotAtPosition(index) {  // Get a Dot on the given position
       return this.selectedDots.at(index)
+   }
+
+   selectDot(dot) { // Add the Dot to array with selected Dots and start playing onSelectTween
+      dot.playOnSelectTween()
+      this.selectedDots.push(dot)
+   }
+   unselectDot(dot) { // Stop playing onSelectTween
+      dot.stopOnSelectTween()
    }
 
 }

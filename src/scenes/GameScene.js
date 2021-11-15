@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 
 import DotsField from "../classes/DotsField";
 import CustomGraphics from "../classes/CustomGraphics";
+import ParticlesManager from "../particles/ParticlesManager";
 
 import {sceneEvents} from '../events/Events'
 
@@ -11,17 +12,21 @@ export default class GameScene extends Phaser.Scene {
    /** @type {CustomGraphics} */
    graphics; // Draws lines
    points; // Earned points
+   /** @type {ParticlesManager} */
+   particles;
 
    constructor() {
       super('game');
    }
 
-   init() {
+   preload() {
+      this.load.image('circle', 'assets/circle.png')
    }
 
    create() {
       this.scene.run('game-ui') // Running UI
 
+      this.particles = new ParticlesManager(this, 'circle')
       this.dots = new DotsField(this)
       this.graphics = new CustomGraphics(this)
 
@@ -33,6 +38,9 @@ export default class GameScene extends Phaser.Scene {
       }, this)
 
       this.input.on('pointerdown', this.onPointerDown, this) // Mouse click event
+
+      const emitter = this.particles.generateEmitter({x: 200, y: 200, color: 0xff0000})
+      emitter.start()
    }
 
    increasePoints(points) {  // adding points

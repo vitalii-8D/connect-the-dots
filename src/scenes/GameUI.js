@@ -15,8 +15,9 @@ export default class GameUI extends Phaser.Scene {
    create() {
       /** @type { Phaser.Types.GameObjects.Text.TextStyle} */
       const textStyle = {
-         fontSize: 36,    // Text style config
-         color: '#5D3F6A'
+         fontSize: 42,    // Text style config
+         color: '#5D3F6A',
+         fontStyle: 'bold'
       }
 
       this.pointsText = this.add.text(  // Create 'POINTS' label in the right-top corner
@@ -24,7 +25,7 @@ export default class GameUI extends Phaser.Scene {
          GAME_HEIGHT * 0.05,
          'POINTS: 0',
          textStyle
-      ).setOrigin(1, 0.5)
+      ).setOrigin(1, 0.5).setDepth(10)
 
       sceneEvents.on('update-points-text', this.updatePointsText, this)  // Listener for the text updating
       this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {  // Remove listener if the scene is Shut down

@@ -14,5 +14,5 @@ export const GAME_HEIGHT = Y_MARGIN * 2 + CELL_SIZE * ROW_NUM
 export const POINTS_PER_DOT = 1
 
 // Set of dots` colors:   жовтий,  блакитний, зелений,  червоний, фіолетовий.
-export const COLOR_SET = [0xffff00, 0x0000ff, 0x00ff00, 0xff0000, 0xcc0066]
+export const COLOR_SET = [0xffff00, 0x0000ff, 0x00ff00, 0xff0000, 0xcc0099]
 export const BG_COLOR = '#ffffe5'
