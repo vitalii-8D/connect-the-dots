@@ -32,10 +32,6 @@ export default class GameScene extends Phaser.Scene {
       this.input.on('pointerdown', this.onPointerDown, this) // Mouse click event
    }
 
-   leave() {
-      console.log('leave')
-   }
-
    increasePoints(points) {  // adding points
       this.points += points;
       sceneEvents.emit('update-points-text', this.points) // Event emitted for GameUI to update the POINTS text

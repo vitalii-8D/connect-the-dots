@@ -6,7 +6,6 @@ import {sceneEvents} from '../events/Events'
 import {CELL_SIZE, COL_NUM, POINTS_PER_DOT, ROW_NUM, DOT_TWEENS} from '../constants/constants'
 
 export default class DotsField extends Phaser.GameObjects.Group {
-   /** @type {Phaser.Scene} */
    scene;
    selectedColor;  // Color of the first selected Dot in the chain
    selectedDots = [];  // Array of selected Dots
@@ -14,13 +13,12 @@ export default class DotsField extends Phaser.GameObjects.Group {
 
    constructor(scene) {
       super(scene);
-
       this.scene = scene
+
       this.init()
    }
 
-   init() {
-      // Creates initial amount of Dots  with given col and row numbers
+   init() {  // Creates initial amount of Dots  with given col and row numbers
       for (let col = 0; col < COL_NUM; col++) {
          for (let row = 0; row < ROW_NUM; row++) {
             const dot = Dot.generate(this.scene, col, row)
@@ -44,10 +42,10 @@ export default class DotsField extends Phaser.GameObjects.Group {
 
          if (!this.selectedDots.some(d => d === dot)) { // New nearby Dot should be connected to the chain
             this.selectDot(dot)
-            connectLine(dot)  // Connect Dot with the previously selected one.  Method from CustomGraphics
+            connectLine(dot)  // Connect Dot with the previously selected one. (Method from CustomGraphics)
          }
 
-         if (this.isCircleFormed(dot)) {
+         if (this.isCircleFormed(dot)) { // In case selected Dots are closing in a circle
             this.selectedDots.forEach(dot => dot.stopSelectedTween());
 
             this.dotsSameColor = this.getMatching('color', this.selectedColor)
@@ -58,7 +56,7 @@ export default class DotsField extends Phaser.GameObjects.Group {
 
             this.scene.input.once('pointerout', this.unmarkDotsSameColor, this)
          }
-      } // *** if ***
+      }// *** IF ***
 
       // Checking if hovered Dot intended should be unmarked
       if (dot === this.getSelectedDotAtPosition(-2)) {
@@ -67,7 +65,8 @@ export default class DotsField extends Phaser.GameObjects.Group {
 
          undoConnecting(this.selectedDots) // Redrawing all lines after undoing last selecting.  Method from CustomGraphics
       }
-   }  // *** connectNext(dot, connectLine, undoConnecting) {} ***
+
+   }//*** connectNext(dot, connectLine, undoConnecting) {} ***
 
    unmarkDotsSameColor() {
 
