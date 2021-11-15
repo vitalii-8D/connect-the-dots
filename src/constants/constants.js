@@ -12,6 +12,13 @@ export const GAME_WIDTH = X_MARGIN * 2 + CELL_SIZE * COL_NUM
 export const GAME_HEIGHT = Y_MARGIN * 2 + CELL_SIZE * ROW_NUM
 
 export const POINTS_PER_DOT = 1
+export const DOT_TWEENS = {
+   INITIAL: 'INITIAL',
+   MOVING: 'MOVING',
+   RESETTING: 'RESETTING',
+   ON_SELECTED: 'ON_SELECTED',
+   ALL_SELECTED: 'ALL_SELECTED'
+}
 
 // Set of dots` colors:   жовтий,  блакитний, зелений,  червоний, фіолетовий.
 export const COLOR_SET = [0xffff00, 0x0000ff, 0x00ff00, 0xff0000, 0xcc0099]

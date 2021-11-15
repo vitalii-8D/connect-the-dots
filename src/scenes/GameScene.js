@@ -32,6 +32,10 @@ export default class GameScene extends Phaser.Scene {
       this.input.on('pointerdown', this.onPointerDown, this) // Mouse click event
    }
 
+   leave() {
+      console.log('leave')
+   }
+
    increasePoints(points) {  // adding points
       this.points += points;
       sceneEvents.emit('update-points-text', this.points) // Event emitted for GameUI to update the POINTS text
@@ -65,7 +69,7 @@ export default class GameScene extends Phaser.Scene {
    }
 
    onPointerUp(pointer, targets) {  // Mouse UP handler
-      this.dots.checkSelectedDots() // Finish selecting and destroy connected dots(if acceptable)
+      this.dots.checkSelectedDots(targets[0]) // Finish selecting and destroy connected dots(if acceptable)
       this.graphics.clearGraphics() // Clear all connected lines
 
       this.input.on('pointerdown', this.onPointerDown, this) // Add mouse up listener again

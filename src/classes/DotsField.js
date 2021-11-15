@@ -3,13 +3,14 @@ import Phaser from "phaser";
 import Dot from "./Dot";
 import {sceneEvents} from '../events/Events'
 
-import {CELL_SIZE, COL_NUM, POINTS_PER_DOT, ROW_NUM} from '../constants/constants'
+import {CELL_SIZE, COL_NUM, POINTS_PER_DOT, ROW_NUM, DOT_TWEENS} from '../constants/constants'
 
 export default class DotsField extends Phaser.GameObjects.Group {
    /** @type {Phaser.Scene} */
    scene;
    selectedColor;  // Color of the first selected Dot in the chain
    selectedDots = [];  // Array of selected Dots
+   dotsSameColor; // All Dots on the field with selected color
 
    constructor(scene) {
       super(scene);
@@ -28,24 +29,36 @@ export default class DotsField extends Phaser.GameObjects.Group {
       }
    }
 
-   selectFirst(dot) {
-      // Selecting the Dot when clicking the first time
+   selectFirst(dot) {  // Selecting the Dot when clicking the first time
       this.selectedColor = dot.color;
       this.selectDot(dot)
    }
 
    connectNext(dot, connectLine, undoConnecting) {
-      // Checking if hovered Dot can be selected and added to the chain or an already selected Dot should be unmarked
+      // Checking if the hovered Dot can be selected and added to the chain or the already selected Dot should be unmarked
       const lastSelectedDot = this.getSelectedDotAtPosition(-1)  // Dot which added the last
 
       if (dot.color === this.selectedColor
          && Phaser.Math.Distance.Between(dot.x, dot.y, lastSelectedDot.x, lastSelectedDot.y) < CELL_SIZE + 5
-         && !this.selectedDots.some(d => d === dot)
       ) {
-         this.selectDot(dot)
 
-         connectLine(dot)  // Connect Dot with the previously selected one.  Method from CustomGraphics
-      }
+         if (!this.selectedDots.some(d => d === dot)) { // New nearby Dot should be connected to the chain
+            this.selectDot(dot)
+            connectLine(dot)  // Connect Dot with the previously selected one.  Method from CustomGraphics
+         }
+
+         if (this.isCircleFormed(dot)) {
+            this.selectedDots.forEach(dot => dot.stopSelectedTween());
+
+            this.dotsSameColor = this.getMatching('color', this.selectedColor)
+            this.dotsSameColor.forEach(dot => {
+               dot.switchTween(DOT_TWEENS.ALL_SELECTED)
+               dot.playSelectedTween()
+            })
+
+            this.scene.input.once('pointerout', this.unmarkDotsSameColor, this)
+         }
+      } // *** if ***
 
       // Checking if hovered Dot intended should be unmarked
       if (dot === this.getSelectedDotAtPosition(-2)) {
@@ -54,14 +67,39 @@ export default class DotsField extends Phaser.GameObjects.Group {
 
          undoConnecting(this.selectedDots) // Redrawing all lines after undoing last selecting.  Method from CustomGraphics
       }
+   }  // *** connectNext(dot, connectLine, undoConnecting) {} ***
 
+   unmarkDotsSameColor() {
+
+      this.dotsSameColor.forEach(dot => {
+         dot.stopSelectedTween()
+         dot.switchTween(DOT_TWEENS.ON_SELECTED)
+      })
+
+      this.selectedDots.forEach(dot => dot.playSelectedTween())
+
+      this.scene.input.off('pointerout', this.unmarkDotsSameColor, this)
+
+      this.dotsSameColor = null
    }
 
-   checkSelectedDots() {  // Checking selected Dots after mouse UP
-      if (this.selectedDots.length > 1) {
-         this.destroyDots(this.selectedDots)  // Kill and Hide the the given Dots
+   checkSelectedDots(dott) {  // Checking selected Dots after mouse UP
 
-         this.moveDownDots(this.selectedDots)  // Move Dots down to free space
+      if (this.isCircleFormed(dott)) { // Replace selectedDots by all Dots same color on the field
+         this.selectedDots = [...this.dotsSameColor];
+
+         this.scene.input.off('pointerout', this.unmarkDotsSameColor, this)
+      }
+
+      this.selectedDots.forEach(dot => {
+         dot.stopSelectedTween()
+         dot.switchTween(DOT_TWEENS.ON_SELECTED)
+      })
+
+      if (this.selectedDots.length > 1) { // Ability to destroy all Dots the same color if your selected Dots formed a ring
+
+         this.destroyDots()  // Kill and Hide the the given Dots
+         this.moveDownDots()  // Move Dots down to free space
 
          const earnedPoints = this.selectedDots.length * POINTS_PER_DOT  //
          sceneEvents.emit('points-earned', earnedPoints)  // Emitting event for Points increasing in GameScene
@@ -70,26 +108,27 @@ export default class DotsField extends Phaser.GameObjects.Group {
    }
 
    resetHelpers() {  // Resetting helpers after pointer is UP
-      this.selectedDots.forEach(dot => this.unselectDot(dot))
+      this.dotsSameColor = null
       this.selectedDots = []
       this.selectedColor = null
    }
 
-   destroyDots(dotsArr) {   // Kill and Hide the the given Dots
-      dotsArr.forEach(dot => {
-         this.killAndHide(dot)
-      })
+   isCircleFormed(dot) {
+      return dot
+         && this.selectedDots.length >= 4
+         && Phaser.Math.Distance.Between(dot.x, dot.y, this.getSelectedDotAtPosition(-1).x, this.getSelectedDotAtPosition(-1).y) < CELL_SIZE + 5
+         && this.selectedDots.slice(0, -3).some(d => d === dot)
    }
 
-   resetDotsAtTheTopOfCol(dotsArr, col) {  // Reset killed and hidden Dots at the top of column
-      dotsArr.forEach((dot, index) => {
-         dot.setNewColorAndPosition(index)
+   destroyDots() {   // Kill and Hide the the given Dots
+      this.selectedDots.forEach(dot => {
+         this.killAndHide(dot)
       })
    }
 
    moveDownDots(dotsArr) {
       // Handling point disappearing and resetting
-      const moveObj = this.getMoveObject(dotsArr)  // Helper object for moving remaining dots to empty positions
+      const moveObj = this.getMoveObject(this.selectedDots)  // Helper object for moving remaining dots to empty positions
 
       for (const col in moveObj) {  // Iterating through affected columns
          const maxRowIndex = Math.max(...moveObj[col])  // The lowest affected row (moving the Dots starting from this row and moving on to the top)
@@ -113,6 +152,12 @@ export default class DotsField extends Phaser.GameObjects.Group {
       }
    }
 
+   resetDotsAtTheTopOfCol(dotsArr) {  // Reset killed and hidden Dots at the top of column
+      dotsArr.forEach((dot, index) => {
+         dot.setNewColorAndPosition(index)
+      })
+   }
+
    getMoveObject(dotsArr) {
       // Create the object which help to manage our Dots moving from given Dots array
       return dotsArr.reduce((prevValue, curValue) => {  // Helper object for deleting selected chains of Dots
@@ -132,11 +177,12 @@ export default class DotsField extends Phaser.GameObjects.Group {
    }
 
    selectDot(dot) { // Add the Dot to array with selected Dots and start playing onSelectTween
-      dot.playOnSelectTween()
+      dot.playSelectedTween()
       this.selectedDots.push(dot)
    }
+
    unselectDot(dot) { // Stop playing onSelectTween
-      dot.stopOnSelectTween()
+      dot.stopSelectedTween()
    }
 
 }

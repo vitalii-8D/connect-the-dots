@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 
 import {sceneEvents} from '../events/Events'
 
-import {GAME_WIDTH, GAME_HEIGHT} from '../constants/constants'
+import {GAME_WIDTH, GAME_HEIGHT, Y_MARGIN} from '../constants/constants'
 
 export default class GameUI extends Phaser.Scene {
    /** @type {Phaser.GameObjects.Text} */
@@ -22,7 +22,7 @@ export default class GameUI extends Phaser.Scene {
 
       this.pointsText = this.add.text(  // Create 'POINTS' label in the right-top corner
          GAME_WIDTH * 0.9,
-         GAME_HEIGHT * 0.05,
+         Y_MARGIN * 0.5,
          'POINTS: 0',
          textStyle
       ).setOrigin(1, 0.5).setDepth(10)
