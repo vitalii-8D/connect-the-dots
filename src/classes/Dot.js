@@ -1,12 +1,9 @@
 import Phaser from "phaser";
 
-import {sceneEvents} from "../events/Events";
 import {CELL_SIZE, COL_NUM, COLOR_SET, DOT_SIZE, ROW_NUM, X_MARGIN, Y_MARGIN} from '../constants/constants'
 
 // Our Dot`s class
 export default class Dot extends Phaser.GameObjects.Arc {
-   /** @type {Phaser.GameObjects.Particles.ParticleEmitter} */
-   emitter;  // Particles emitter
 
    static generateAttributes(colNum, rowNum) {  // Generating Dot`s attributes
       const color = Phaser.Utils.Array.GetRandom(COLOR_SET)  // Get random color from the set
@@ -36,9 +33,6 @@ export default class Dot extends Phaser.GameObjects.Arc {
       this.setInteractive()  // Making Dot visible for Pointer events
       this.scene.add.existing(this)  // Adding Dot to the scene
 
-      this.emitter = scene.particles.generateEmitter({x, y, color})
-      console.log(this.emitter);
-
       this.createTween({
          y,
          delay: col * 30 * COL_NUM + (ROW_NUM - 1 - row) * 30 + 500
@@ -51,7 +45,6 @@ export default class Dot extends Phaser.GameObjects.Arc {
          delay: 30,
          duration: 300,
          scale: 1.15,
-         alpha: 1,
          onLoop: () => {
             this.setScale(Math.cos(this.scene.time.now) * 0.3+0.85, Math.sin(this.scene.time.now) * 0.3+0.85)
          },
@@ -110,21 +103,6 @@ export default class Dot extends Phaser.GameObjects.Arc {
    stopOnSelectTween() {
       this.onSelectTween.stop()
    }
-   emitParticles(moveDots) {
-      this.scene.particles.changeConfig(this)
-      this.emitter.start()
-
-      this.createTween({
-         scale: 0.2,
-         duration: 500,
-         onComplete: () => {
-            this.emitter.stop()
-            console.log('complete');
-            moveDots()
-         },
-         callbackScope: this
-      }).play()
-   }
 
    /** @param {Phaser.Types.Tweens.TweenBuilderConfig} extra */
    createTween(extra = {}) { // Create animation of falling Dot
@@ -132,7 +110,7 @@ export default class Dot extends Phaser.GameObjects.Arc {
       /** @type {Phaser.Types.Tweens.TweenBuilderConfig} */
       const tweenConfig = {
          targets: this,
-         duration: 120,
+         duration: 150,
          ease: 'Linear',
          ...extra
       }

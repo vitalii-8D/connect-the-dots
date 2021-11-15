@@ -61,14 +61,11 @@ export default class DotsField extends Phaser.GameObjects.Group {
       if (this.selectedDots.length > 1) {
          this.destroyDots(this.selectedDots)  // Kill and Hide the the given Dots
 
-         this.emitParticles(this.selectedDots, () => {
-            this.moveDownDots(this.selectedDots)  // Move Dots down to free space
+         this.moveDownDots(this.selectedDots)  // Move Dots down to free space
 
-            const earnedPoints = this.selectedDots.length * POINTS_PER_DOT  //
-            sceneEvents.emit('points-earned', earnedPoints)  // Emitting event for Points increasing in GameScene
-         })
+         const earnedPoints = this.selectedDots.length * POINTS_PER_DOT  //
+         sceneEvents.emit('points-earned', earnedPoints)  // Emitting event for Points increasing in GameScene
       }
-
       this.resetHelpers()
    }
 
@@ -76,12 +73,6 @@ export default class DotsField extends Phaser.GameObjects.Group {
       this.selectedDots.forEach(dot => this.unselectDot(dot))
       this.selectedDots = []
       this.selectedColor = null
-   }
-
-   emitParticles(dotsArr, cb) {
-      dotsArr.forEach(dot => {
-         dot.emitParticles(cb)
-      })
    }
 
    destroyDots(dotsArr) {   // Kill and Hide the the given Dots
