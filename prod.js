@@ -29,7 +29,7 @@ module.exports = merge(base, {
     new CopyPlugin([
       {
         from: path.join(__dirname, 'assets'),
-        to: path.resolve(__dirname, 'dist', 'assets'),
+        to: path.resolve(__dirname, 'docs', 'assets'),
       }
     ])
   ]

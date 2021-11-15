@@ -15,6 +15,7 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.png'],
     alias: {
+      // '~': path.resolve(__dirname, './src')
     }
   },
   mode: "development",
