@@ -14,34 +14,24 @@ export default class CustomGraphics extends Phaser.GameObjects.Graphics {
       this.mouseLine = scene.add.line().setOrigin(0, 0).setLineWidth(5, 5)
    }
 
-   startLineFrom(dot) {
-      // Graphics
+   startLineFrom(dot) { // Calling from GameScene.onPointerDown()
+      // Start drawing connecting line
       this.lineStyle(10, dot.color)
       this.fillStyle(10, dot.color)
       this.beginPath()
       this.moveTo(dot.x, dot.y);
 
-      // Mouse Line
+      // Separate line from Dot to cursor pointer
       this.mouseLine.setTo(dot.x, dot.y, dot.x, dot.y)
       this.mouseLine.setAlpha(1)
       this.mouseLine.setStrokeStyle(5, dot.color, 1)
    }
 
-   connectLineTo(dot) {
+   connectLineTo(dot) { // Calling from GameScene.onPointerOver()
       this.lineTo(dot.x, dot.y)
       this.strokePath();
    }
-
-   clearDrawings() {
-      this.mouseLine.setAlpha(0)
-      this.clear();
-   }
-
-   updateMouseLine(dot, pointer) {
-      this.mouseLine.setTo(dot.x, dot.y, pointer.x, pointer.y)
-   }
-
-   redrawLines(dotsArr) {
+   redrawLines(dotsArr) { // Calling from GameScene.onPointerOver()
       this.clearDrawings()
 
       const length = dotsArr.length;
@@ -64,4 +54,14 @@ export default class CustomGraphics extends Phaser.GameObjects.Graphics {
       }
 
    }
+
+   clearDrawings() {
+      this.mouseLine.setAlpha(0)
+      this.clear();
+   }
+
+   updateMouseLine(dot, pointer) {
+      this.mouseLine.setTo(dot.x, dot.y, pointer.x, pointer.y)
+   }
+
 }

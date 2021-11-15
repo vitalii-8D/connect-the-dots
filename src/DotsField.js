@@ -3,7 +3,7 @@ import Dot from "./Dot";
 
 import {CELL_SIZE, COL_NUM, COLOR_SET, DOT_SIZE, ROW_NUM} from './constants'
 
-export default class Dots extends Phaser.GameObjects.Group {
+export default class DotsField extends Phaser.GameObjects.Group {
    /** @type {Phaser.Scene} */
    scene;
    chosenColor;
@@ -18,45 +18,47 @@ export default class Dots extends Phaser.GameObjects.Group {
    }
 
    init() {
-      for (let i = 0; i < ROW_NUM; i++) {
-         for (let j = 0; j < COL_NUM; j++) {
-            const dot = Dot.generate(this.scene, i, j)
+      for (let col = 0; col < COL_NUM; col++) {
+         for (let row = 0; row < ROW_NUM; row++) {
+            const dot = Dot.generate(this.scene, col, row)
             this.add(dot)
          }
       }
    }
 
-   onDotClick(dot) {
-      this.chosenColor = dot.color;
+   selectFirst(dot) {
+      const {col, row, color} = dot
+
+      this.chosenColor = color;
       this.chosenDots.push(dot)
 
-      this.updateMoveObj(dot.col, dot.row)
+      this.updateHelperObj(col, row)
    }
 
-   onDotOverlap(dot, cb) {
-      const lastChosenDot = this.chosenDots[this.chosenDots.length - 1];
+   connectNext(dot, connectLine, undoConnecting) {
+      const lastChosenDot = this.chosenDots.at(-1)
       if (dot.color === this.chosenColor
          && Phaser.Math.Distance.Between(dot.x, dot.y, lastChosenDot.x, lastChosenDot.y) < CELL_SIZE + 5
          && !this.chosenDots.some(d => d === dot)
       ) {
          this.chosenDots.push(dot)
 
-         this.updateMoveObj(dot.col, dot.row)
+         this.updateHelperObj(dot.col, dot.row)
 
-         cb('connect');
+         connectLine(dot)
       }
 
-      if (dot === this.chosenDots[this.chosenDots.length - 2]) {
-         console.log('undo')
+      if (dot === this.chosenDots.at(-2)) {
          const releasedDot = this.chosenDots.pop()
-         const {col, row} = releasedDot
-         this.moveObj[col] = this.moveObj[col].filter(r => r != row)
-         cb('undo')
+
+         this.moveObj[releasedDot.col] = this.moveObj[releasedDot.col].filter(row => row != releasedDot.row)
+
+         undoConnecting(this.chosenDots)
       }
 
    }
 
-   onMouseUp() {
+   stopSelecting() {
       if (this.chosenDots.length > 1) {
 
          this.chosenDots.forEach(dot => {
@@ -65,6 +67,8 @@ export default class Dots extends Phaser.GameObjects.Group {
 
          this.handleChosenDots(this.moveObj)
       }
+
+      this.resetHelpers()
    }
 
    resetHelpers() {
@@ -73,8 +77,8 @@ export default class Dots extends Phaser.GameObjects.Group {
       this.chosenColor = null
    }
 
-   updateMoveObj(col, row) {
-      // Creating object for further dots moving
+   updateHelperObj(col, row) {
+      // Creating a helper object for further dots moving
       if (!this.moveObj[col]) {
          this.moveObj[col] = []
       }
@@ -84,21 +88,14 @@ export default class Dots extends Phaser.GameObjects.Group {
    handleChosenDots(moveObj) {
 
       for (const col in moveObj) {
-         const shift = moveObj[col].length
-         const startRowIndex = Math.min(...moveObj[col]) - 1
-
          const maxRowIndex = Math.max(...moveObj[col])
-
          const dotsCol = this.getMatching('col', +col);
-         const dotsToMove = dotsCol.filter(dot => dot.row < maxRowIndex && dot.active)
 
-         // **********************
          let s = 1;
          let cell = maxRowIndex
 
          for (let i = maxRowIndex - 1; i >= 0; i--) {
             const dot = dotsCol.find(d => d.row === i)
-            console.log(dot);
             if (dot.active) {
                dot.goDownPer(s)
                cell--;
@@ -106,15 +103,6 @@ export default class Dots extends Phaser.GameObjects.Group {
                s++;
             }
          }
-         // ************************************
-
-         // if (startRowIndex >= 0) {
-         //    dotsCol.forEach(dot => {
-         //       if (dot.row <= startRowIndex) {
-         //          dot.goDownPer(shift)
-         //       }
-         //    })
-         // }
 
          const inactiveDots = dotsCol.filter(dot => !dot.active)
 

@@ -7,7 +7,7 @@ const gameConfig = {
 	type: Phaser.AUTO,
 	width: GAME_WIDTH,
 	height: GAME_HEIGHT,
-	backgroundColor: 0xffffff,
+	backgroundColor: 0xffffe5,
 	parent: 'phaser-game',
 	scale: {
 		mode: Phaser.Scale.FIT,

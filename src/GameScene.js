@@ -1,68 +1,62 @@
 import Phaser from 'phaser';
 
-import Dot from "./Dot";
-import Dots from "./Dots";
-import CustomGraphics from "./Graphics";
-
-import {CELL_SIZE, COL_NUM, COLOR_SET, DOT_SIZE, ROW_NUM} from './constants'
+import DotsField from "./DotsField";
+import CustomGraphics from "./CustomGraphics";
 
 export default class GameScene extends Phaser.Scene {
-   /** @type {Dots} */
-   dotsGroup;
+   /** @type {DotsField} */
+   dots;
+   /** @type {CustomGraphics} */
+   graphics;
 
    constructor() {
       super('game');
    }
 
    create() {
-      this.dotsGroup = new Dots(this)
+      this.dots = new DotsField(this)
       this.graphics = new CustomGraphics(this)
 
-      this.input.on('pointerdown', this.startDrag, this)
+      this.input.on('pointerdown', this.onPointerDown, this)
    }
 
-   startDrag(pointer, targets) {
+   onPointerDown(pointer, targets) {
       /** @type {Dot} */
       const dot = targets[0]
       if (!dot) return;
 
-      this.dotsGroup.onDotClick(dot)
+      this.dots.selectFirst(dot)
       this.graphics.startLineFrom(dot)
 
-      this.input.off('pointerdown', this.startDrag, this)
-      this.input.on('pointermove', this.drawMouseLine, this)
-      this.input.on('pointerover', this.doDrag, this)
-      this.input.on('pointerup', this.stopDrag, this)
+      this.input.off('pointerdown', this.onPointerDown, this)
+      this.input.on('pointermove', this.onPointerMove, this)
+      this.input.on('pointerover', this.onPointerOver, this)
+      this.input.on('pointerup', this.onPointerUp, this)
    }
 
-   doDrag(pointer, targets) {
-      /** @type {Dot} */
+   onPointerOver(pointer, targets) {
       const dot = targets[0]
       if (!dot) return;
 
-      this.dotsGroup.onDotOverlap(dot, (action) => {
-         if (action === 'connect') {
-            this.graphics.connectLineTo(dot)
-         }
-         if (action === 'undo') {
-            this.graphics.redrawLines(this.dotsGroup.chosenDots)
-         }
-      })
+      this.dots.connectNext(
+         dot,
+         this.graphics.connectLineTo.bind(this.graphics),
+         this.graphics.redrawLines.bind(this.graphics)
+      )
    }
 
-   stopDrag(pointer, targets) {
-      this.dotsGroup.onMouseUp()
-      this.dotsGroup.resetHelpers()
+   onPointerUp(pointer, targets) {
+      this.dots.stopSelecting()
       this.graphics.clearDrawings()
 
-      this.input.on('pointerdown', this.startDrag, this)
-      this.input.off('pointermove', this.drawMouseLine, this)
-      this.input.off('pointerover', this.doDrag, this)
-      this.input.off('pointerup', this.stopDrag, this)
+      this.input.on('pointerdown', this.onPointerDown, this)
+      this.input.off('pointermove', this.onPointerMove, this)
+      this.input.off('pointerover', this.onPointerOver, this)
+      this.input.off('pointerup', this.onPointerUp, this)
    }
 
-   drawMouseLine(pointer) {
-      const lastDot = this.dotsGroup.chosenDots[this.dotsGroup.chosenDots.length - 1]
+   onPointerMove(pointer) {
+      const lastDot = this.dots.chosenDots.at(-1)
 
       this.graphics.updateMouseLine(lastDot, pointer)
    }

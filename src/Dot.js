@@ -21,14 +21,13 @@ export default class Dot extends Phaser.GameObjects.Arc {
    }
 
    init(data) {
-      const {scene, x, y, radius, color, col, row} = data;
+      const {scene, y, color, col, row} = data;
 
       this.scene = scene
       this.col = col
       this.row = row
       this.color = color
-
-      this.targetY = y
+      // this.targetY = y
 
       this.setInteractive()
       this.scene.add.existing(this)
@@ -61,12 +60,13 @@ export default class Dot extends Phaser.GameObjects.Arc {
 
    restoreColorAndPosition(row) {
       const data = Dot.generateAttributes(this.col, row)
+
       this.color = data.color
-      this.setFillStyle(data.color)
       this.row = row
       this.y = -CELL_SIZE
 
-      this.enableDot()
+      this.setFillStyle(data.color)
+      this.makeActive()
 
       this.scene.tweens.add({
          targets: this,
@@ -76,7 +76,7 @@ export default class Dot extends Phaser.GameObjects.Arc {
       })
    }
 
-   enableDot() {
+   makeActive() {
       this.setActive(true)
       this.setVisible(true)
    }

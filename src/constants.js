@@ -4,7 +4,7 @@ export const GAME_HEIGHT = 700
 export const ROW_NUM = 6
 export const COL_NUM = 6
 export const CELL_SIZE = 100
-export const DOT_SIZE = 50
+export const DOT_SIZE = 60
 
 export const X_MARGIN = (GAME_WIDTH - (ROW_NUM - 1) * CELL_SIZE) * 0.5;
 export const Y_MARGIN = (GAME_HEIGHT - (COL_NUM - 1) * CELL_SIZE) * 0.5;
