@@ -19,4 +19,5 @@ export const DOT_TWEENS = {
 
 // Set of dots` colors:   жовтий,  блакитний, зелений,  червоний, фіолетовий.
 export const COLOR_SET = [0xffff00, 0x0000ff, 0x00ff00, 0xff0000, 0xcc0099]
+
 export const BG_COLOR = '#ffffe5'

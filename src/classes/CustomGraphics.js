@@ -1,8 +1,6 @@
 import Phaser from "phaser";
 
 export default class CustomGraphics extends Phaser.GameObjects.Graphics {
-   /** @type {Phaser.Scene} */
-   scene;
    /** @type {Phaser.GameObjects.Line} */
    mouseLine;
 
@@ -14,31 +12,34 @@ export default class CustomGraphics extends Phaser.GameObjects.Graphics {
       this.mouseLine = scene.add.line().setOrigin(0, 0).setLineWidth(5, 5)
    }
 
+   //  *****  Separate line from Dot to cursor pointer  ***
    startLineFrom(dot) {  // Calling from GameScene.onPointerDown()
-      // Separate line from Dot to cursor pointer
       this.mouseLine.setTo(dot.x, dot.y, dot.x, dot.y)
       this.mouseLine.setAlpha(1)
       this.mouseLine.setStrokeStyle(5, dot.color, 1)
-   }
+   } // ****************************
+
+   // *****  Start drawing connecting line  ***
    startPathFrom(dot) {
-      // Start drawing connecting line
       this.lineStyle(10, dot.color)
       this.fillStyle(10, dot.color)
       this.beginPath()
       this.moveTo(dot.x, dot.y);
-   }
+   } // ****************************
 
-   connectLineTo(dot) {  // Calling from GameScene.onPointerOver()
+   //  *****  Calling from GameScene.onPointerOver()  ***
+   connectLineTo(dot) {
       this.lineTo(dot.x, dot.y)
       this.strokePath();
-   }
+   } // ****************************
 
-   redrawLines(dotsArr) {  // Calling from GameScene.onPointerOver()
+   // *****  Calling from GameScene.onPointerOver()   ***
+   redrawLines(dotsArr) {
       this.clearGraphics()
 
       const lastDot = dotsArr.at(-1)
 
-      // Mouse Line
+      // * Mouse Line *
       this.startLineFrom(lastDot)
       this.startPathFrom(dotsArr[0])
 
@@ -48,15 +49,17 @@ export default class CustomGraphics extends Phaser.GameObjects.Graphics {
             this.strokePath();
          }
       }
-   }
+   } // ****************************
 
-   clearGraphics() {  // Clear all drawn lines
+   //  *****  Clear all drawn lines  ***
+   clearGraphics() {
       this.mouseLine.setAlpha(0)
       this.clear();
-   }
+   } // ****************************
 
-   updateMouseLine(dot, pointer) {  // Updating Cursor`s line position
+   //  *****  Updating Cursor`s line position  ***
+   updateMouseLine(dot, pointer) {
       this.mouseLine.setTo(dot.x, dot.y, pointer.x, pointer.y)
-   }
+   } // ****************************
 
 }

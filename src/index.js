@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
 
+import Preloader from "./scenes/Preloader";
 import GameScene from "./scenes/GameScene";
 import GameUI from "./scenes/GameUI";
 
 import {GAME_HEIGHT, GAME_WIDTH, BG_COLOR} from "./constants/constants";
-import Preloader from "./scenes/Preloader";
 
 /** @type {Phaser.Types.Core.GameConfig}  */
 const gameConfig = {

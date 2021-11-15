@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 
 import {sceneEvents} from '../events/Events'
 
-import {GAME_WIDTH, GAME_HEIGHT, Y_MARGIN} from '../constants/constants'
+import {GAME_WIDTH, Y_MARGIN} from '../constants/constants'
 
 export default class GameUI extends Phaser.Scene {
    /** @type {Phaser.GameObjects.Text} */

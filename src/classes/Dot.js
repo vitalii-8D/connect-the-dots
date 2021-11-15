@@ -87,15 +87,18 @@ export default class Dot extends Phaser.GameObjects.Arc {
 
    playSelectedTween() {
       this.currentTween.play()
+      return this
    }
-
    stopSelectedTween() {
       this.currentTween.stop()
+      return this
    }
-
    switchTween(name) {
       this.currentTween = this.tweens[name]
+      return this
    }
+
+
 
    createInitialTweens(data) {
       const {y, col, row} = data;

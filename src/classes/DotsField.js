@@ -6,7 +6,6 @@ import {sceneEvents} from '../events/Events'
 import {CELL_SIZE, COL_NUM, POINTS_PER_DOT, ROW_NUM, DOT_TWEENS} from '../constants/constants'
 
 export default class DotsField extends Phaser.GameObjects.Group {
-   scene;
    selectedColor;  // Color of the first selected Dot in the chain
    selectedDots = [];  // Array of selected Dots
    dotsSameColor; // All Dots on the field with selected color
@@ -27,62 +26,63 @@ export default class DotsField extends Phaser.GameObjects.Group {
       }
    }
 
-   selectFirst(dot) {  // Selecting the Dot when clicking the first time
+
+   //  *********  Selecting the Dot when clicking the first time  *********
+   selectFirst(dot) {
       this.selectedColor = dot.color;
       this.selectDot(dot)
-   }
+   } // ****************************
 
+   //  *********  Checking if the hovered Dot can be selected and added...  *********
+   //  ********* ...to the chain or the already selected Dot should be unmarked  *********
    connectNext(dot, connectLine, undoConnecting) {
-      // Checking if the hovered Dot can be selected and added to the chain or the already selected Dot should be unmarked
       const lastSelectedDot = this.getSelectedDotAtPosition(-1)  // Dot which added the last
 
       if (dot.color === this.selectedColor
          && Phaser.Math.Distance.Between(dot.x, dot.y, lastSelectedDot.x, lastSelectedDot.y) < CELL_SIZE + 5
       ) {
-
-         if (!this.selectedDots.some(d => d === dot)) { // New nearby Dot should be connected to the chain
+         //  *********  New nearby Dot should be connected to the chain  *********
+         if (!this.selectedDots.some(d => d === dot)) {
             this.selectDot(dot)
             connectLine(dot)  // Connect Dot with the previously selected one. (Method from CustomGraphics)
-         }
+         } // ****************************
 
-         if (this.isCircleFormed(dot)) { // In case selected Dots are closing in a circle
-            this.selectedDots.forEach(dot => dot.stopSelectedTween());
+         //  *********  In case selected Dots are closing in a circle  *********
+         if (this.isCircleFormed(dot)) {
+            this.iterateDots(this.selectedDots, dot => dot.stopSelectedTween())
 
             this.dotsSameColor = this.getMatching('color', this.selectedColor)
-            this.dotsSameColor.forEach(dot => {
-               dot.switchTween(DOT_TWEENS.ALL_SELECTED)
-               dot.playSelectedTween()
-            })
+            this.iterateDots(this.dotsSameColor, dot => dot.switchTween(DOT_TWEENS.ALL_SELECTED).playSelectedTween())
 
             this.scene.input.once('pointerout', this.unmarkDotsSameColor, this)
-         }
+         } // ****************************
       }// *** IF ***
 
-      // Checking if hovered Dot intended should be unmarked
+
+      //  *********  Checking if hovered Dot intended should be unmarked  *********
       if (dot === this.getSelectedDotAtPosition(-2)) {
          const releasedDot = this.selectedDots.pop()
          this.unselectDot(releasedDot)
 
          undoConnecting(this.selectedDots) // Redrawing all lines after undoing last selecting.  Method from CustomGraphics
-      }
+      } // ****************************
 
-   }//*** connectNext(dot, connectLine, undoConnecting) {} ***
+   }// >>>>>>>>>>> connectNext(dot, connectLine, undoConnecting) <<<<<<<<<<<<<<
 
+
+   //  *********  Unmark all same colored Dots and change Tween back to initial  *********
    unmarkDotsSameColor() {
+      this.iterateDots(this.dotsSameColor, dot => dot.stopSelectedTween().switchTween(DOT_TWEENS.FEW_SELECTED))
 
-      this.dotsSameColor.forEach(dot => {
-         dot.stopSelectedTween()
-         dot.switchTween(DOT_TWEENS.FEW_SELECTED)
-      })
-
-      this.selectedDots.forEach(dot => dot.playSelectedTween())
+      this.iterateDots(this.selectedDots, dot => dot.playSelectedTween())
+      this.dotsSameColor = null
 
       this.scene.input.off('pointerout', this.unmarkDotsSameColor, this)
+   } // ****************************
 
-      this.dotsSameColor = null
-   }
 
-   checkSelectedDots(dott) {  // Checking selected Dots after mouse UP
+   //  *********  Checking selected Dots after mouse UP  *********
+   checkSelectedDots(dott) {
 
       if (this.isCircleFormed(dott)) { // Replace selectedDots by all Dots same color on the field
          this.selectedDots = [...this.dotsSameColor];
@@ -90,43 +90,22 @@ export default class DotsField extends Phaser.GameObjects.Group {
          this.scene.input.off('pointerout', this.unmarkDotsSameColor, this)
       }
 
-      this.selectedDots.forEach(dot => {
-         dot.stopSelectedTween()
-         dot.switchTween(DOT_TWEENS.FEW_SELECTED)
-      })
+      this.iterateDots(this.selectedDots, dot => dot.stopSelectedTween().switchTween(DOT_TWEENS.FEW_SELECTED))
 
       if (this.selectedDots.length > 1) { // Ability to destroy all Dots the same color if your selected Dots formed a ring
-
-         this.destroyDots()  // Kill and Hide the the given Dots
+         this.iterateDots(this.selectedDots, dot => this.killAndHide(dot))
          this.moveDownDots()  // Move Dots down to free space
 
-         const earnedPoints = this.selectedDots.length * POINTS_PER_DOT  //
+         const earnedPoints = this.selectedDots.length * POINTS_PER_DOT
          sceneEvents.emit('points-earned', earnedPoints)  // Emitting event for Points increasing in GameScene
       }
+
       this.resetHelpers()
-   }
+   } // ****************************
 
-   resetHelpers() {  // Resetting helpers after pointer is UP
-      this.dotsSameColor = null
-      this.selectedDots = []
-      this.selectedColor = null
-   }
 
-   isCircleFormed(dot) {
-      return dot
-         && this.selectedDots.length >= 4
-         && Phaser.Math.Distance.Between(dot.x, dot.y, this.getSelectedDotAtPosition(-1).x, this.getSelectedDotAtPosition(-1).y) < CELL_SIZE + 5
-         && this.selectedDots.slice(0, -3).some(d => d === dot)
-   }
-
-   destroyDots() {   // Kill and Hide the the given Dots
-      this.selectedDots.forEach(dot => {
-         this.killAndHide(dot)
-      })
-   }
-
+   //  *********  Handling point disappearing and resetting  *********
    moveDownDots(dotsArr) {
-      // Handling point disappearing and resetting
       const moveObj = this.getMoveObject(this.selectedDots)  // Helper object for moving remaining dots to empty positions
 
       for (const col in moveObj) {  // Iterating through affected columns
@@ -146,19 +125,22 @@ export default class DotsField extends Phaser.GameObjects.Group {
             }
          }
 
-         const destroyedDots = dotsCol.filter(dot => !dot.active)  //
-         this.resetDotsAtTheTopOfCol(destroyedDots)  // // Reset killed and hidden Dots at the top of column
-      }
-   }
+         const destroyedDots = dotsCol.filter(dot => !dot.active)
 
-   resetDotsAtTheTopOfCol(dotsArr) {  // Reset killed and hidden Dots at the top of column
-      dotsArr.forEach((dot, index) => {
-         dot.setNewColorAndPosition(index)
-      })
-   }
+         this.iterateDots(destroyedDots, (dot, index) => dot.setNewColorAndPosition(index))
+      } // >>>>>>>>>for (const col in moveObj) <<<<<<<<<<<<
 
+   } // >>>>>>>>> moveDownDots(dotsArr) <<<<<<<<<<<<
+
+
+   //  *********  Generic class for iterating Dots  *********
+   iterateDots(dotsArr, cb) {
+      dotsArr.forEach(cb)
+   } // ****************************
+
+
+   //  *********  Create the object which help to manage our Dots moving from given Dots array  *********
    getMoveObject(dotsArr) {
-      // Create the object which help to manage our Dots moving from given Dots array
       return dotsArr.reduce((prevValue, curValue) => {  // Helper object for deleting selected chains of Dots
          const {col, row} = curValue;
 
@@ -168,20 +150,39 @@ export default class DotsField extends Phaser.GameObjects.Group {
          prevValue[col].push(row)
          return prevValue
       }, {})
-   }
+   } // ****************************
 
-   // Get selected dot at special position
-   getSelectedDotAtPosition(index) {  // Get a Dot on the given position
-      return this.selectedDots.at(index)
-   }
 
-   selectDot(dot) { // Add the Dot to array with selected Dots and start playing onSelectTween
+   //  *********  Add the Dot to array with selected Dots and start playing onSelectTween  *********
+   selectDot(dot) {
       dot.playSelectedTween()
       this.selectedDots.push(dot)
    }
-
    unselectDot(dot) { // Stop playing onSelectTween
       dot.stopSelectedTween()
-   }
+   } // ****************************
+
+
+   //  *********  Check if the chain with selected Dots closed on circle  *********
+   isCircleFormed(dot) {
+      return dot
+         && this.selectedDots.length >= 4
+         && Phaser.Math.Distance.Between(dot.x, dot.y, this.getSelectedDotAtPosition(-1).x, this.getSelectedDotAtPosition(-1).y) < CELL_SIZE + 5
+         && this.selectedDots.slice(0, -3).some(d => d === dot)
+   } // ****************************
+
+
+   //  *********  Resetting helpers after pointer is UP  *********
+   resetHelpers() {
+      this.selectedDots = []
+      this.selectedColor = null
+      this.dotsSameColor = null
+   } // ****************************
+
+
+   //  *********  Get a Dot on the given position  *********
+   getSelectedDotAtPosition(index) {
+      return this.selectedDots.at(index)
+   } // ****************************
 
 }
