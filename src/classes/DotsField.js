@@ -73,7 +73,7 @@ export default class DotsField extends Phaser.GameObjects.Group {
 
       this.dotsSameColor.forEach(dot => {
          dot.stopSelectedTween()
-         dot.switchTween(DOT_TWEENS.ON_SELECTED)
+         dot.switchTween(DOT_TWEENS.FEW_SELECTED)
       })
 
       this.selectedDots.forEach(dot => dot.playSelectedTween())
@@ -93,7 +93,7 @@ export default class DotsField extends Phaser.GameObjects.Group {
 
       this.selectedDots.forEach(dot => {
          dot.stopSelectedTween()
-         dot.switchTween(DOT_TWEENS.ON_SELECTED)
+         dot.switchTween(DOT_TWEENS.FEW_SELECTED)
       })
 
       if (this.selectedDots.length > 1) { // Ability to destroy all Dots the same color if your selected Dots formed a ring

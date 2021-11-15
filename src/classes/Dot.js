@@ -29,13 +29,13 @@ export default class Dot extends Phaser.GameObjects.Arc {
       this.col = col
       this.row = row
       this.color = color
-      this.tweens = {}
+      this.tweens = {} // Dot`s tweens
 
       this.setInteractive()  // Making Dot visible for Pointer events
       this.scene.add.existing(this)  // Adding Dot to the scene
 
       this.createInitialTweens(data)
-      this.currentTween = this.tweens[DOT_TWEENS.ON_SELECTED]
+      this.currentTween = this.tweens[DOT_TWEENS.FEW_SELECTED]
    }
 
    static generate(scene, colNum, rowNum) {  // Dot`s generator
@@ -53,17 +53,20 @@ export default class Dot extends Phaser.GameObjects.Arc {
    goDownPer(cellsNum) {  // Move Dot down to empty place per given cell number
       this.row += cellsNum
 
-      this.tweens[DOT_TWEENS.MOVING] = this.scene.tweens.add({
-         targets: this,
-         duration: 150,
-         ease: 'Linear',
-         y: `+=${cellsNum * CELL_SIZE}`,
-         onComplete: () => {
-            // this.tweens[DOT_TWEENS.MOVING].remove()
-            // this.tweens[DOT_TWEENS.MOVING] = null
-         },
-         callbackScope: this
+      this.createTween({
+         y: `+=${cellsNum * CELL_SIZE}`
       })
+
+      // this.scene.tweens.add({
+      //    targets: this,
+      //    duration: 150,
+      //    ease: 'Linear',
+      //    y: `+=${cellsNum * CELL_SIZE}`,
+      //    onComplete: (tween) => {
+      //       tween.remove()
+      //    },
+      //    callbackScope: this
+      // })
    }
 
    setNewColorAndPosition(row, col = this.col) {  // Resetting destroyed Dot
@@ -77,18 +80,22 @@ export default class Dot extends Phaser.GameObjects.Arc {
       this.setFillStyle(data.color, 1) // set color to the Dot
       this.makeActive()  // Set the Dot to the active state
 
-      this.tweens[DOT_TWEENS.RESETTING] = this.scene.tweens.add({
-         targets: this,
-         ease: 'Linear',
+      this.createTween({
          y: data.y,
          delay: (ROW_NUM - row) * 20,
-         duration: 150,
-         onComplete: () => {
-            // this.tweens[DOT_TWEENS.RESETTING].remove()
-            // this.tweens[DOT_TWEENS.RESETTING] = null
-         },
-         callbackScope: this
       })
+
+      // this.scene.tweens.add({
+      //    targets: this,
+      //    ease: 'Linear',
+      //    y: data.y,
+      //    delay: (ROW_NUM - row) * 20,
+      //    duration: 150,
+      //    onComplete: (tween) => {
+      //       tween.remove()
+      //    },
+      //    callbackScope: this
+      // })
    }
 
    makeActive() {  // Set the Dot to the active state
@@ -99,6 +106,7 @@ export default class Dot extends Phaser.GameObjects.Arc {
    playSelectedTween() {
       this.currentTween.play()
    }
+
    stopSelectedTween() {
       this.currentTween.stop()
    }
@@ -110,50 +118,81 @@ export default class Dot extends Phaser.GameObjects.Arc {
    createInitialTweens(data) {
       const {y, col, row} = data;
 
-      this.tweens[DOT_TWEENS.INITIAL] = this.scene.tweens.add({
-         targets: this,
-         ease: 'Linear',
+      this.createTween({
          y,
-         delay: col * 30 * COL_NUM + (ROW_NUM - 1 - row) * 30 + 500,
-         duration: 150,
-         onComplete: () => {
-            // this.tweens[DOT_TWEENS.INITIAL].remove()
-            // this.tweens[DOT_TWEENS.INITIAL] = null
-         },
-         callbackScope: this
+         delay: col * 30 * COL_NUM + (ROW_NUM - 1 - row) * 30 + 500
       })
 
-      this.tweens[DOT_TWEENS.ON_SELECTED] = this.scene.tweens.create({
-         targets: this,
-         ease: 'Linear',
+      // this.scene.tweens.add({
+      //    targets: this,
+      //    ease: 'Linear',
+      //    y,
+      //    delay: col * 30 * COL_NUM + (ROW_NUM - 1 - row) * 30 + 500,
+      //    duration: 150,
+      //    onComplete: (tween) => {
+      //       tween.remove()
+      //    },
+      //    callbackScope: this
+      // })
+
+      this.tweens[DOT_TWEENS.FEW_SELECTED] = this.createTween({
          scale: 1.2,
          delay: 30,
          duration: 300,
-         yoyo: true,
-         repeat: -1,
-         onActive: () => {
-            this.setScale(1)
-         },
-         onStop: () => {
-            this.setScale(1)
-         },
-         callbackScope: this
-      })
-      this.tweens[DOT_TWEENS.ALL_SELECTED] = this.scene.tweens.create({
-         targets: this,
+         onActive: () => this.setScale(1)
+      }, false, true, false)
+
+      // this.tweens[DOT_TWEENS.FEW_SELECTED] = this.scene.tweens.create({
+      //    targets: this,
+      //    ease: 'Linear',
+      //    scale: 1.2,
+      //    delay: 30,
+      //    duration: 300,
+      //    yoyo: true,
+      //    repeat: -1,
+      //    onActive: () => this.setScale(1),
+      //    onStop: () => this.setScale(1),
+      //    callbackScope: this
+      // })
+
+      this.tweens[DOT_TWEENS.ALL_SELECTED] = this.createTween({
          ease: 'Bounce',  // 'Cubic', 'Elastic', 'Bounce', 'Back'
          scale: 1.3,
+         duration: 200,
+         onActive: () => this.setScale(1.1),
+      }, false, true, false)
+
+      // this.tweens[DOT_TWEENS.ALL_SELECTED] = this.scene.tweens.create({
+      //    targets: this,
+      //    ease: 'Bounce',  // 'Cubic', 'Elastic', 'Bounce', 'Back'
+      //    scale: 1.3,
+      //    duration: 150,
+      //    yoyo: true,
+      //    repeat: -1,
+      //    onActive: () => this.setScale(1.1),
+      //    onStop: () => this.setScale(1),
+      //    callbackScope: this
+      // })
+   }
+
+   createTween(extra, removeOnComplete = true, repeat = false, play = true) {
+      /** @type {Phaser.Types.Tweens.TweenBuilderConfig} */
+      const config = {
+         targets: this,
+         ease: 'Linear',
          duration: 150,
-         yoyo: true,
-         repeat: -1,
-         onActive: () => {
-            this.setScale(1.1)
-         },
          onStop: () => {
             this.setScale(1)
          },
-         callbackScope: this
-      })
+         callbackScope: this,
+         ...extra
+      }
+
+      repeat ? Object.assign(config, {yoyo: true, repeat: -1}) : '';
+      removeOnComplete ? Object.assign(config, {onComplete: tween => tween.remove()}) : '';
+
+      return this.scene.tweens[`${play ? 'add' : 'create'}`](config)
    }
+
 }
 
