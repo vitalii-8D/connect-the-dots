@@ -72,7 +72,7 @@ export default class Dot extends Phaser.GameObjects.Arc {
       this.y = -DOT_SIZE
 
       this.setFillStyle(data.color, 1) // set color to the Dot
-      this.makeActive()  // Set the Dot to the active state
+      this.setAlive(true)  // Set the Dot to the active state
 
       this.createTween({ // Falling down from the top of screen to it`s place
          y: data.y,
@@ -80,9 +80,9 @@ export default class Dot extends Phaser.GameObjects.Arc {
       })
    }
 
-   makeActive() {  // Set the Dot to the active state
-      this.setActive(true)
-      this.setVisible(true)
+   setAlive(status) {  // Set the Dot to the active state
+      this.setActive(status)
+      this.setVisible(status)
    }
 
    playSelectedTween() {
