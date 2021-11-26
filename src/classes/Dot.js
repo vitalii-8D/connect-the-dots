@@ -8,7 +8,8 @@ export default class Dot extends Phaser.GameObjects.Arc {
    row;
    color;
    tweens;
-   
+   currentTween;
+
    static generateAttributes(colNum, rowNum, exclude) {  // Generating Dot`s attributes
       const colorSet = exclude ? COLOR_SET.filter(color => color !== exclude) : COLOR_SET
       const color = Phaser.Utils.Array.GetRandom(colorSet)  // Get random color from the set
