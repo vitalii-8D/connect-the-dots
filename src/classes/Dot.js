@@ -10,8 +10,9 @@ export default class Dot extends Phaser.GameObjects.Arc {
    tweens;
    currentTween;
 
-   static generateAttributes(colNum, rowNum) {  // Generating Dot`s attributes
-      const color = Phaser.Utils.Array.GetRandom(COLOR_SET)  // Get random color from the set
+   static generateAttributes(colNum, rowNum, exclude) {  // Generating Dot`s attributes
+      const colorSet = exclude ? COLOR_SET.filter(color => color !== exclude) : COLOR_SET
+      const color = Phaser.Utils.Array.GetRandom(colorSet)  // Get random color from the set
 
       const x = X_MARGIN + CELL_SIZE * (colNum) + CELL_SIZE / 2; // Converting col index to the game`s X coordinates
       const y = Y_MARGIN + CELL_SIZE * (rowNum) + CELL_SIZE / 2; // Converting row index to the game`s Y coordinates
@@ -63,12 +64,12 @@ export default class Dot extends Phaser.GameObjects.Arc {
       })
    }
 
-   setNewColorAndPosition(row, col = this.col) {  // Resetting destroyed Dot
-      const data = Dot.generateAttributes(col, row)
+   resetDot(row, exclude) {  // Resetting destroyed Dot
+      const data = Dot.generateAttributes(this.col, row, exclude)
 
       this.color = data.color
       this.row = row
-      this.col = col
+      // this.col = this.col
       this.y = -DOT_SIZE
 
       this.setFillStyle(data.color, 1) // set color to the Dot

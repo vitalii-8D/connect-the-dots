@@ -13,7 +13,7 @@ export default class GameScene extends Phaser.Scene {
    points; // Earned points
 
    constructor() {
-      super('game');
+      super('Game');
    }
 
    create() {

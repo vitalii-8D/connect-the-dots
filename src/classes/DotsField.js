@@ -8,7 +8,7 @@ import {CELL_SIZE, COL_NUM, POINTS_PER_DOT, ROW_NUM, DOT_TWEENS} from '../consta
 export default class DotsField extends Phaser.GameObjects.Group {
    selectedColor;  // Color of the first selected Dot in the chain
    selectedDots = [];  // Array of selected Dots
-   dotsSameColor; // All Dots on the field with selected color
+   dotsSameColor = null; // All Dots on the field with selected color
 
    constructor(scene) {
       super(scene);
@@ -49,10 +49,8 @@ export default class DotsField extends Phaser.GameObjects.Group {
 
          //  *********  In case selected Dots are closing in a circle  *********
          if (this.isCircleFormed(dot)) {
-            // this.iterateDots(this.selectedDots, dot => dot.stopSelectedTween())
 
             this.dotsSameColor = this.getMatching('color', this.selectedColor)
-            // this.iterateDots(this.dotsSameColor, dot => dot.switchTween(DOT_TWEENS.ALL_SELECTED).playSelectedTween())
 
             this.stopSwitchPlayTween(this.selectedDots, this.dotsSameColor, this.dotsSameColor, DOT_TWEENS.ALL_SELECTED)
 
@@ -74,9 +72,8 @@ export default class DotsField extends Phaser.GameObjects.Group {
 
    //  *********  Unmark all same colored Dots and change Tween back to initial  *********
    unmarkDotsSameColor() {
-      // this.iterateDots(this.dotsSameColor, dot => dot.stopSelectedTween().switchTween(DOT_TWEENS.FEW_SELECTED))
       this.stopSwitchPlayTween(this.dotsSameColor, this.dotsSameColor, this.selectedDots, DOT_TWEENS.FEW_SELECTED)
-      // this.iterateDots(this.selectedDots, dot => dot.playSelectedTween())
+
       this.dotsSameColor = null
 
       this.scene.input.off('pointerout', this.unmarkDotsSameColor, this)
@@ -92,11 +89,11 @@ export default class DotsField extends Phaser.GameObjects.Group {
          this.scene.input.off('pointerout', this.unmarkDotsSameColor, this)
       }
 
-      // this.iterateDots(this.selectedDots, dot => dot.stopSelectedTween().switchTween(DOT_TWEENS.FEW_SELECTED))
       this.stopSwitchPlayTween(this.selectedDots, this.selectedDots, null, DOT_TWEENS.FEW_SELECTED)
 
       if (this.selectedDots.length > 1) { // Ability to destroy all Dots the same color if your selected Dots formed a ring
-         this.iterateDots(this.selectedDots, dot => dot.setAlive(false) /*this.killAndHide(dot)*/)
+         this.selectedDots.forEach(dot => dot.setAlive(false))
+
          this.moveDownDots()  // Move Dots down to free space
 
          const earnedPoints = this.selectedDots.length * POINTS_PER_DOT
@@ -136,16 +133,11 @@ export default class DotsField extends Phaser.GameObjects.Group {
 
          const destroyedDots = dotsCol.filter(dot => !dot.active)
 
-         this.iterateDots(destroyedDots, (dot, index) => dot.setNewColorAndPosition(index))
+         // If we destroy all same colored dots - there shouldn`t be this color in new dots.
+         destroyedDots.forEach((dot, index) => dot.resetDot(index, this.dotsSameColor ? this.selectedColor : false))
       } // >>>>>>>>>for (const col in moveObj) <<<<<<<<<<<<
 
    } // >>>>>>>>> moveDownDots(dotsArr) <<<<<<<<<<<<
-
-
-   //  *********  Generic class for iterating Dots  *********
-   iterateDots(dotsArr, cb) {
-      dotsArr.forEach(cb)
-   } // ****************************
 
 
    //  *********  Create the object which help to manage our Dots moving from given Dots array  *********

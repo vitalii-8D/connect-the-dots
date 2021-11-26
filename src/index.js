@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
-import Preloader from "./scenes/Preloader";
+import BootScene from "./scenes/BootScene";
+import PreloadScene from "./scenes/PreloadScene";
 import GameScene from "./scenes/GameScene";
 import GameUI from "./scenes/GameUI";
 
@@ -17,13 +18,13 @@ const gameConfig = {
 		mode: Phaser.Scale.FIT, // Canvas fit the window size
 		autoCenter: Phaser.Scale.CENTER_BOTH, // Canvas is centered
 	},
-	scene: [Preloader, GameScene, GameUI],
+	scene: [BootScene, PreloadScene, GameUI, GameScene],
 };
 
 const game = new Phaser.Game(gameConfig);
 
 // Setting background color from config file to all document
 document.addEventListener('DOMContentLoaded', () => {
-	const body = document.getElementById('body')
-	body.style.backgroundColor = BG_COLOR
+	// const body = document.getElementById('body')
+	// body.style.backgroundColor = BG_COLOR
 })
