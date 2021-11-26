@@ -38,6 +38,7 @@ export default class Dot extends Phaser.GameObjects.Arc {
       this.row = row
       this.targetY = targetY
       this.color = color
+      this.isAnimating = false
 
       this.setInteractive()  // Making Dot visible for Pointer events
       scene.add.existing(this)  // Adding Dot to the scene
@@ -87,33 +88,59 @@ export default class Dot extends Phaser.GameObjects.Arc {
       this.setVisible(status)
    }
 
+   setSelected(state) {
+      if (this.isAnimating) return;
+
+      const animKey = state ? DOT_TWEENS.SELECT : DOT_TWEENS.UNSELECT;
+
+      this.tweens[animKey].play()
+   }
+
+   setAnimated(state) {
+      if (this.isAnimating === state) return;
+
+      this.isAnimating = state
+      state ?
+         this.tweens[DOT_TWEENS.ANIMATION].play()
+         : this.tweens[DOT_TWEENS.ANIMATION].stop(0)
+   }
+
+
    createTweens() {
       this.tweens[DOT_TWEENS.FALL] = this.scene.tweens.create({
          targets: this,
          y: () => this.targetY,
          delay: 50,
          duration: 400,
-         // ease: 'Linear',
          ease: 'Bounce.easeOut',
       })
-      this.tweens[DOT_TWEENS.MARK] = this.scene.tweens.create({
+
+      this.tweens[DOT_TWEENS.SELECT] = this.createScaleTween({scale: 1.3})
+
+      this.tweens[DOT_TWEENS.UNSELECT] = this.createScaleTween({scale: 0.8})
+
+      this.tweens[DOT_TWEENS.ANIMATION] = this.createScaleTween({
+         ease: 'Linear',
+         repeat: -1,
+         delay: 10,
+         duration: 100
+      })
+   }
+
+
+   createScaleTween(extras) {
+      const config = {
          targets: this,
+         ease: 'Back.easeInOut',
          scale: 1.5,
          yoyo: true,
          repeat: 1,
-         delay: 100,
-         duration: 200,
-         ease: 'Bounce.easeOut'
-      })
-      this.tweens[DOT_TWEENS.UNMARK] = this.scene.tweens.create({
-         targets: this,
-         scale: 1.5,
-         yoyo: true,
-         repeat: 1,
-         delay: 100,
-         duration: 200,
-         ease: 'Bounce.easeOut'
-      })
+         delay: 20,
+         duration: 80,
+         ...extras
+      }
+
+      return this.scene.tweens.create(config)
    }
 
 }

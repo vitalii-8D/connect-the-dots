@@ -40,8 +40,7 @@ export default class GameScene extends Phaser.Scene {
    onPointerDown(pointer, targets) { // Mouse click handler
       /** @type {Dot} */
       const dot = targets[0]
-      const tweenIsPlaying = this.tweens.getAllTweens().length; // Prevent clicking while any tween playing
-      if (!dot || tweenIsPlaying) return;
+      if (!dot) return;
 
       this.dots.selectFirst(dot) // Selecting clicked dot
       this.graphics.startLineFrom(dot) // Start drawing the line from dot to mouse pointer
@@ -75,7 +74,7 @@ export default class GameScene extends Phaser.Scene {
    }
 
    onPointerMove(pointer) { // Mouse line handler
-      const lastDot = this.dots.getSelectedDotAtPosition(-1)
+      const lastDot = this.dots.selected.getByIndex(-1)
 
       this.graphics.updateMouseLine(lastDot, pointer) // Updating position of the Cursor line
    }
