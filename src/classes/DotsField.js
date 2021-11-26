@@ -33,6 +33,8 @@ export default class DotsField extends Phaser.GameObjects.Group {
       this.selectDot(dot)
    } // ****************************
 
+
+
    //  *********  Checking if the hovered Dot can be selected and added...  *********
    //  ********* ...to the chain or the already selected Dot should be unmarked  *********
    connectNext(dot, connectLine, undoConnecting) {
@@ -52,7 +54,7 @@ export default class DotsField extends Phaser.GameObjects.Group {
 
             this.dotsSameColor = this.getMatching('color', this.selectedColor)
 
-            this.stopSwitchPlayTween(this.selectedDots, this.dotsSameColor, this.dotsSameColor, DOT_TWEENS.ALL_SELECTED)
+            // this.stopSwitchPlayTween(this.selectedDots, this.dotsSameColor, this.dotsSameColor, DOT_TWEENS.ALL_SELECTED)
 
             this.scene.input.once('pointerout', this.unmarkDotsSameColor, this)
          } // ****************************
@@ -62,7 +64,7 @@ export default class DotsField extends Phaser.GameObjects.Group {
       //  *********  Checking if hovered Dot intended should be unmarked  *********
       if (dot === this.getSelectedDotAtPosition(-2)) {
          const releasedDot = this.selectedDots.pop()
-         this.unselectDot(releasedDot)
+         // this.unselectDot(releasedDot)
 
          undoConnecting(this.selectedDots) // Redrawing all lines after undoing last selecting.  Method from CustomGraphics
       } // ****************************
@@ -72,7 +74,7 @@ export default class DotsField extends Phaser.GameObjects.Group {
 
    //  *********  Unmark all same colored Dots and change Tween back to initial  *********
    unmarkDotsSameColor() {
-      this.stopSwitchPlayTween(this.dotsSameColor, this.dotsSameColor, this.selectedDots, DOT_TWEENS.FEW_SELECTED)
+      // this.stopSwitchPlayTween(this.dotsSameColor, this.dotsSameColor, this.selectedDots, DOT_TWEENS.FEW_SELECTED)
 
       this.dotsSameColor = null
 
@@ -89,7 +91,7 @@ export default class DotsField extends Phaser.GameObjects.Group {
          this.scene.input.off('pointerout', this.unmarkDotsSameColor, this)
       }
 
-      this.stopSwitchPlayTween(this.selectedDots, this.selectedDots, null, DOT_TWEENS.FEW_SELECTED)
+      // this.stopSwitchPlayTween(this.selectedDots, this.selectedDots, null, DOT_TWEENS.FEW_SELECTED)
 
       if (this.selectedDots.length > 1) { // Ability to destroy all Dots the same color if your selected Dots formed a ring
          this.selectedDots.forEach(dot => dot.setAlive(false))
@@ -103,11 +105,11 @@ export default class DotsField extends Phaser.GameObjects.Group {
       this.resetHelpers()
    } // ****************************
 
-   stopSwitchPlayTween(toStop, toSwitch, toPlay, tweenKey) {
-      toStop?.forEach(dot => dot.stopSelectedTween())
-      toSwitch?.forEach(dot => dot.switchTween(tweenKey))
-      toPlay?.forEach(dot => dot.playSelectedTween())
-   }
+   // stopSwitchPlayTween(toStop, toSwitch, toPlay, tweenKey) {
+   //    toStop?.forEach(dot => dot.stopSelectedTween())
+   //    toSwitch?.forEach(dot => dot.switchTween(tweenKey))
+   //    toPlay?.forEach(dot => dot.playSelectedTween())
+   // }
 
 
    //  *********  Handling point disappearing and resetting  *********
@@ -156,12 +158,12 @@ export default class DotsField extends Phaser.GameObjects.Group {
 
    //  *********  Add the Dot to array with selected Dots and start playing onSelectTween  *********
    selectDot(dot) {
-      dot.playSelectedTween()
+      // dot.playSelectedTween()
       this.selectedDots.push(dot)
    }
-   unselectDot(dot) { // Stop playing onSelectTween
-      dot.stopSelectedTween()
-   } // ****************************
+   // unselectDot(dot) { // Stop playing onSelectTween
+   //    dot.stopSelectedTween()
+   // } // ****************************
 
 
    //  *********  Check if the chain with selected Dots closed on circle  *********

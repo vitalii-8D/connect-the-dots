@@ -4,44 +4,47 @@ import {CELL_SIZE, COL_NUM, COLOR_SET, DOT_SIZE, ROW_NUM, X_MARGIN, Y_MARGIN, DO
 
 // Our Dot`s class
 export default class Dot extends Phaser.GameObjects.Arc {
+   /** @type {Phaser.Scene} */
+   scene;
    col;
    row;
    color;
-   tweens;
-   currentTween;
+   targetY;
+
+   tweens = {}
 
    static generateAttributes(colNum, rowNum, exclude) {  // Generating Dot`s attributes
       const colorSet = exclude ? COLOR_SET.filter(color => color !== exclude) : COLOR_SET
       const color = Phaser.Utils.Array.GetRandom(colorSet)  // Get random color from the set
 
       const x = X_MARGIN + CELL_SIZE * (colNum) + CELL_SIZE / 2; // Converting col index to the game`s X coordinates
-      const y = Y_MARGIN + CELL_SIZE * (rowNum) + CELL_SIZE / 2; // Converting row index to the game`s Y coordinates
+      const y = -CELL_SIZE * (ROW_NUM - rowNum)
+      const targetY = Y_MARGIN + CELL_SIZE * (rowNum) + CELL_SIZE / 2; // Converting row index to the game`s Y coordinates
 
-      return {x, y, color}
+      return {x, y, color, targetY}
    }
 
-   // /** @param {Phaser.Scene} scene   */
    constructor(data) {
       const {scene, x, y, radius, color} = data;
-      super(scene, x, -DOT_SIZE, radius, 0, Phaser.Math.PI2, true, color); // Allow Dot to fall from the top by setting Y coordinates to -DOT_SIZE
+      super(scene, x, y, radius, 0, Phaser.Math.PI2, true, color); // Allow Dot to fall from the top by setting Y coordinates to -DOT_SIZE
 
       this.init(data);
    }
 
-   init(data) {
-      const {scene, color, col, row} = data;
-
+   init({scene, color, col, row, targetY}) {
       this.scene = scene
+
       this.col = col
       this.row = row
+      this.targetY = targetY
       this.color = color
-      this.tweens = {} // Dot`s tweens
 
       this.setInteractive()  // Making Dot visible for Pointer events
       scene.add.existing(this)  // Adding Dot to the scene
 
-      this.createInitialTweens(data)
-      this.currentTween = this.tweens[DOT_TWEENS.FEW_SELECTED]
+      this.createTweens()
+
+      this.tweens[DOT_TWEENS.FALL].play()
    }
 
    static generate(scene, colNum, rowNum) {  // Dot`s generator
@@ -58,10 +61,10 @@ export default class Dot extends Phaser.GameObjects.Arc {
 
    goDownPer(cellsNum) {  // Move Dot down to empty place per given cell number
       this.row += cellsNum
+      this.targetY += cellsNum * CELL_SIZE
 
-      this.createTween({  // Moving down
-         y: `+=${cellsNum * CELL_SIZE}`
-      })
+      this.tweens[DOT_TWEENS.FALL].data[0].start = this.y
+      this.tweens[DOT_TWEENS.FALL].restart()
    }
 
    resetDot(row, exclude) {  // Resetting destroyed Dot
@@ -69,16 +72,14 @@ export default class Dot extends Phaser.GameObjects.Arc {
 
       this.color = data.color
       this.row = row
-      // this.col = this.col
-      this.y = -DOT_SIZE
+      // this.y = data.y
+      this.targetY = data.targetY
 
-      this.setFillStyle(data.color, 1) // set color to the Dot
+      this.setFillStyle(data.color) // set color to the Dot
       this.setAlive(true)  // Set the Dot to the active state
 
-      this.createTween({ // Falling down from the top of screen to it`s place
-         y: data.y,
-         delay: (ROW_NUM - row) * 20,
-      })
+      this.tweens[DOT_TWEENS.FALL].data[0].start = data.y
+      this.tweens[DOT_TWEENS.FALL].restart()
    }
 
    setAlive(status) {  // Set the Dot to the active state
@@ -86,63 +87,33 @@ export default class Dot extends Phaser.GameObjects.Arc {
       this.setVisible(status)
    }
 
-   playSelectedTween() {
-      this.currentTween.play()
-      return this
-   }
-   stopSelectedTween() {
-      this.currentTween.stop()
-      return this
-   }
-   switchTween(name) {
-      this.currentTween = this.tweens[name]
-      return this
-   }
-
-
-
-   createInitialTweens(data) {
-      const {y, col, row} = data;
-
-      this.createTween({ // Falling down from the top of screen to it`s place
-         y,
-         delay: col * 30 * COL_NUM + (ROW_NUM - 1 - row) * 30 + 500
-      })
-
-      this.tweens[DOT_TWEENS.FEW_SELECTED] = this.createTween({ // When Dots are selected manually
-         scale: 1.2,
-         delay: 30,
-         duration: 300,
-         onActive: () => this.setScale(1)
-      }, false, true, false)
-
-      this.tweens[DOT_TWEENS.ALL_SELECTED] = this.createTween({ // When all same colored Dots are selected due to closing in a circle
-         ease: 'Bounce',  // 'Cubic', 'Elastic', 'Bounce', 'Back'
-         scale: 1.3,
-         duration: 200,
-         onActive: () => this.setScale(1.1),
-      }, false, true, false)
-   }
-
-
-   // Tween`s builder
-   createTween(extra, removeOnComplete = true, repeat = false, play = true) {
-      /** @type {Phaser.Types.Tweens.TweenBuilderConfig} */
-      const config = {
+   createTweens() {
+      this.tweens[DOT_TWEENS.FALL] = this.scene.tweens.create({
          targets: this,
-         ease: 'Linear',
-         duration: 150,
-         onStop: () => {
-            this.setScale(1)
-         },
-         callbackScope: this,
-         ...extra
-      }
-
-      repeat ? Object.assign(config, {yoyo: true, repeat: -1}) : '';
-      removeOnComplete ? Object.assign(config, {onComplete: tween => tween.remove()}) : '';
-
-      return this.scene.tweens[`${play ? 'add' : 'create'}`](config)
+         y: () => this.targetY,
+         delay: 50,
+         duration: 400,
+         // ease: 'Linear',
+         ease: 'Bounce.easeOut',
+      })
+      this.tweens[DOT_TWEENS.MARK] = this.scene.tweens.create({
+         targets: this,
+         scale: 1.5,
+         yoyo: true,
+         repeat: 1,
+         delay: 100,
+         duration: 200,
+         ease: 'Bounce.easeOut'
+      })
+      this.tweens[DOT_TWEENS.UNMARK] = this.scene.tweens.create({
+         targets: this,
+         scale: 1.5,
+         yoyo: true,
+         repeat: 1,
+         delay: 100,
+         duration: 200,
+         ease: 'Bounce.easeOut'
+      })
    }
 
 }
