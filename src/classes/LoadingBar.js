@@ -7,9 +7,9 @@ export default class LoadingBar {
       this.style = {
          boxColor: 0xd3d3d3,
          barColor: 0xfff8dc,
-         x: scene.scale.width / 2 - 450,
+         x: scene.scale.width / 4,
          y: scene.scale.height / 2 + 250,
-         width: 900,
+         width: scene.scale.width / 2,
          height: 25
       }
 

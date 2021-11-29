@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 
 import BootScene from "./scenes/BootScene";
 import PreloadScene from "./scenes/PreloadScene";
+import MenuScene from "./scenes/MenuScene";
 import GameScene from "./scenes/GameScene";
 import GameUI from "./scenes/GameUI";
 
@@ -18,7 +19,7 @@ const gameConfig = {
 		mode: Phaser.Scale.FIT, // Canvas fit the window size
 		autoCenter: Phaser.Scale.CENTER_BOTH, // Canvas is centered
 	},
-	scene: [BootScene, PreloadScene, GameUI, GameScene],
+	scene: [BootScene, PreloadScene, MenuScene, GameUI, GameScene],
 };
 
 const game = new Phaser.Game(gameConfig);

@@ -1,0 +1,230 @@
+{
+	"textures": [
+		{
+			"image": "rectengular_buttons.png",
+			"format": "RGBA8888",
+			"size": {
+				"w": 950,
+				"h": 94
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "blue_button0.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 190,
+						"h": 49
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 190,
+						"h": 49
+					},
+					"frame": {
+						"x": 0,
+						"y": 0,
+						"w": 190,
+						"h": 49
+					}
+				},
+				{
+					"filename": "green_button0.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 190,
+						"h": 49
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 190,
+						"h": 49
+					},
+					"frame": {
+						"x": 190,
+						"y": 0,
+						"w": 190,
+						"h": 49
+					}
+				},
+				{
+					"filename": "grey_button0.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 190,
+						"h": 49
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 190,
+						"h": 49
+					},
+					"frame": {
+						"x": 380,
+						"y": 0,
+						"w": 190,
+						"h": 49
+					}
+				},
+				{
+					"filename": "red_button0.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 190,
+						"h": 49
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 190,
+						"h": 49
+					},
+					"frame": {
+						"x": 570,
+						"y": 0,
+						"w": 190,
+						"h": 49
+					}
+				},
+				{
+					"filename": "yellow_button0.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 190,
+						"h": 49
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 190,
+						"h": 49
+					},
+					"frame": {
+						"x": 760,
+						"y": 0,
+						"w": 190,
+						"h": 49
+					}
+				},
+				{
+					"filename": "blue_button1.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 190,
+						"h": 45
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 190,
+						"h": 45
+					},
+					"frame": {
+						"x": 0,
+						"y": 49,
+						"w": 190,
+						"h": 45
+					}
+				},
+				{
+					"filename": "green_button1.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 190,
+						"h": 45
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 190,
+						"h": 45
+					},
+					"frame": {
+						"x": 190,
+						"y": 49,
+						"w": 190,
+						"h": 45
+					}
+				},
+				{
+					"filename": "grey_button1.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 190,
+						"h": 45
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 190,
+						"h": 45
+					},
+					"frame": {
+						"x": 380,
+						"y": 49,
+						"w": 190,
+						"h": 45
+					}
+				},
+				{
+					"filename": "red_button1.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 190,
+						"h": 45
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 190,
+						"h": 45
+					},
+					"frame": {
+						"x": 570,
+						"y": 49,
+						"w": 190,
+						"h": 45
+					}
+				},
+				{
+					"filename": "yellow_button1.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 190,
+						"h": 45
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 190,
+						"h": 45
+					},
+					"frame": {
+						"x": 760,
+						"y": 49,
+						"w": 190,
+						"h": 45
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "https://www.codeandweb.com/texturepacker",
+		"version": "3.0",
+		"smartupdate": "$TexturePacker:SmartUpdate:4732eab9f180d7c59051480e2c264dbc:ba3f8fab9ba6fd84e277c32b860e286e:4ff645be0c21225a683c549378c690d0$"
+	}
+}
